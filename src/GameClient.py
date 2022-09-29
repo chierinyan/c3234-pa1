@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import select
+from time import sleep
 from SocketBase import *
 
 
@@ -37,13 +39,18 @@ class Client(SocketBase):
     def game(self):
         logging.debug(self)
         while True:
-            msg = input()
-            self.send_str(msg)
+            stdin_available, _, _ = select.select([sys.stdin], [], [], 0)
+            if stdin_available:
+                msg = sys.stdin.readline().strip()
+                self.send_str(msg)
 
-            res = self.recv_str()
-            logging.info(res)
-            if res == '4001 Bye bye':
-                exit(0)
+            msg_available, _, _ = select.select([self.sock], [], [], 0)
+            if msg_available:
+                res = self.recv_str()
+                logging.info(res)
+                if res == '4001 Bye bye':
+                    exit(0)
+            sleep(0.1)
 
 
 def main(argv):

@@ -39,6 +39,10 @@ class ClientHandler(SocketBase):
             cmd = self.recv_cmd()
 
             if not self.connected:
+                if self.status is ClientHandler.Status.WAITING:
+                    self.room[0].clear()
+                elif self.status is ClientHandler.Status.STARTED:
+                    self.room[0].defeat(self.room[1], disconnected=True)
                 return
 
             if cmd[0] == '/exit':
