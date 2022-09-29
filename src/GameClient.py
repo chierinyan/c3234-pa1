@@ -49,7 +49,12 @@ class Client(SocketBase):
                 res = self.recv_str()
                 logging.info(res)
                 if res == '4001 Bye bye':
+                    self.close()
                     exit(0)
+                elif res == '':
+                    logging.fatal('Connection lost with server')
+                    self.close()
+                    exit(1)
             sleep(0.1)
 
 

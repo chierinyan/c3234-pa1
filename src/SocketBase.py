@@ -11,6 +11,12 @@ class SocketBase:
         self.sock = sock
         self.addr = addr
 
+    def close(self):
+        try:
+            self.sock.close()
+        except:
+            pass
+
     def recv_str(self):
         try:
             msg = self.sock.recv(1024).decode()

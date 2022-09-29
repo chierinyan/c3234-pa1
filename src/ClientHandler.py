@@ -46,6 +46,7 @@ class ClientHandler(SocketBase):
                 elif self.status is ClientHandler.Status.STARTED or \
                      self.status is ClientHandler.Status.GUESSED:
                     self.room[0].defeat(self.room[1], disconnected=True)
+                self.close()
                 return
 
             if cmd[0] == '/exit':
@@ -57,7 +58,11 @@ class ClientHandler(SocketBase):
                 if cmd[0] == '/list':
                     self.send_list()
                 elif cmd[0] == '/enter':
-                    self.enter(int(cmd[1]))
+                    try:
+                        self.enter(int(cmd[1]))
+                    except ValueError:
+                        self.send_str('4002 Unrecognized message')
+                        continue
             elif self.status is ClientHandler.Status.STARTED and cmd[0] == '/guess':
                 self.submit_guess(cmd[1])
             else:
