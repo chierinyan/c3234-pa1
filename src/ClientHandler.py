@@ -9,6 +9,7 @@ class ClientHandler(SocketBase):
         HALL         = auto()
         WAITING      = auto()
         STARTED      = auto()
+        GUESSED      = auto()
 
     def __init__(self, conn, server):
         super().__init__(conn[0], conn[1])
@@ -17,6 +18,7 @@ class ClientHandler(SocketBase):
         self.connected = True
         self.status = ClientHandler.Status.UNAUTHORIZED
         self.room = None
+        self.guess = None
 
         self.thread = threading.Thread(target=self.game)
         self.thread.start()
@@ -41,7 +43,8 @@ class ClientHandler(SocketBase):
             if not self.connected:
                 if self.status is ClientHandler.Status.WAITING:
                     self.room[0].clear()
-                elif self.status is ClientHandler.Status.STARTED:
+                elif self.status is ClientHandler.Status.STARTED or \
+                     self.status is ClientHandler.Status.GUESSED:
                     self.room[0].defeat(self.room[1], disconnected=True)
                 return
 
@@ -55,6 +58,8 @@ class ClientHandler(SocketBase):
                     self.send_list()
                 elif cmd[0] == '/enter':
                     self.enter(int(cmd[1]))
+            elif self.status is ClientHandler.Status.STARTED and cmd[0] == '/guess':
+                self.submit_guess(cmd[1])
             else:
                 self.send_str('4002 Unrecognized message')
 
@@ -78,4 +83,9 @@ class ClientHandler(SocketBase):
             self.server.rooms[room_num].enter(self)
         else:
             self.send_str('4002 Unrecognized message')
+
+    def submit_guess(self, guess):
+        self.guess = (guess.lower() in ('true', 't', '1'))
+        self.status = ClientHandler.Status.GUESSED
+        self.room[0].check_result()
 
