@@ -36,6 +36,14 @@ class Client(SocketBase):
 
     def game(self):
         logging.debug(self)
+        while True:
+            msg = input()
+            self.send_str(msg)
+
+            res = self.recv_str()
+            logging.info(res)
+            if res == '4001 Bye bye':
+                exit(0)
 
 
 def main(argv):

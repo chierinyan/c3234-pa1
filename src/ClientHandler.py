@@ -16,6 +16,7 @@ class ClientHandler(SocketBase):
 
         self.connected = True
         self.status = ClientHandler.Status.UNAUTHORIZED
+        self.room = None
 
         self.thread = threading.Thread(target=self.game)
         self.thread.start()
@@ -45,6 +46,11 @@ class ClientHandler(SocketBase):
                 self.connected = False
             elif self.status is ClientHandler.Status.UNAUTHORIZED and cmd[0] == '/login':
                 self.auth(cmd[1:])
+            elif self.status is ClientHandler.Status.HALL and cmd[0] in ('/list', '/enter'):
+                if cmd[0] == '/list':
+                    self.send_list()
+                elif cmd[0] == '/enter':
+                    self.enter(int(cmd[1]))
             else:
                 self.send_str('4002 Unrecognized message')
 
@@ -55,4 +61,17 @@ class ClientHandler(SocketBase):
             self.status = ClientHandler.Status.HALL
             return
         self.send_str('1002 Authentication failed')
+
+    def send_list(self):
+        list_str = ' '.join(map(str, self.server.get_room_list()))
+        list_res = '3001 ' + list_str
+        self.send_str(list_res)
+
+    def enter(self, room_num):
+        room_num -= 1
+
+        if -1 < room_num < self.server.TOTAL_ROOMS:
+            self.server.rooms[room_num].enter(self)
+        else:
+            self.send_str('4002 Unrecognized message')
 
