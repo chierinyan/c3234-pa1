@@ -2,8 +2,8 @@ import sys
 import socket
 import logging
 
-LOG_FORMAT = '%(levelname)s: %(message)s'
-logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+LOG_FORMAT = '%(message)s'
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
 
 class SocketBase:
