@@ -23,13 +23,14 @@ class ClientHandler(SocketBase):
         self.thread = threading.Thread(target=self.game)
         self.thread.start()
 
-    def recv_cmd(self, expected=('/login', '/list', '/enter', '/guess', '/exit')):
+    def recv_cmd(self):
+        VALID_CMD = {'/login': 3, '/list': 1, '/enter': 2, '/guess': 2, '/exit': 1}
         msg_segs = self.recv_str().split()
         if not msg_segs:
             logging.warning(f'Connection lost with {self}')
             self.connected = False
             return ['/disconnected']
-        if msg_segs[0] not in expected:
+        if (msg_segs[0] not in VALID_CMD) or (len(msg_segs) != VALID_CMD[msg_segs[0]]):
             logging.debug('Failed parsing message')
             return ['/unexpected']
         return msg_segs

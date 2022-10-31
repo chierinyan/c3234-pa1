@@ -23,6 +23,14 @@ class Client(SocketBase):
 
         logging.debug(self)
 
+    def recv_str(self):
+        res = super().recv_str()
+        if res == '':
+            logging.fatal('Connection lost with server')
+            self.close()
+            exit(1)
+        return res
+
     def login(self):
         while True:
             username = input('Please input your user name: ')
@@ -51,10 +59,7 @@ class Client(SocketBase):
                 if res == '4001 Bye bye':
                     self.close()
                     exit(0)
-                elif res == '':
-                    logging.fatal('Connection lost with server')
-                    self.close()
-                    exit(1)
+
             sleep(0.1)
 
 
